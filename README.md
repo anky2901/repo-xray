@@ -40,6 +40,89 @@ xray scan https://github.com/expressjs/express --mode=deep
 Reports are written to `.xray-reports/` by default. Open `.xray-reports/DASHBOARD.html` in a
 browser for the interactive view, or read `REPORT.md` for the summary.
 
+## How to use
+
+A full walkthrough, from install to reading results.
+
+### 1. Install and build
+
+```bash
+pnpm install
+pnpm build
+```
+
+### 2. Check your environment
+
+```bash
+node apps/cli/dist/index.js doctor
+```
+
+This confirms Node, pnpm, git, SQLite, cache access, and disk space. Fix anything it reports as
+`FAIL` before scanning.
+
+### 3. Run your first scan
+
+Pick a target — a local folder, a GitHub URL, or a `.zip` archive — and choose a mode. For a full
+review, use `deep`:
+
+```bash
+# a local project
+node apps/cli/dist/index.js scan ./path/to/project --mode=deep
+
+# a remote repository
+node apps/cli/dist/index.js scan https://github.com/expressjs/express --mode=deep
+
+# the current directory
+node apps/cli/dist/index.js scan . --mode=deep
+```
+
+Use `--output=<dir>` to write reports somewhere other than `.xray-reports/`.
+
+### 4. Read the results
+
+After a scan, look at the output directory (default `.xray-reports/`):
+
+- **`DASHBOARD.html`** — open in a browser for the interactive view: score cards, a severity
+  summary, and a filterable findings table. Start here.
+- **`REPORT.md`** — the text summary with the health scorecard and the top findings.
+- **Topic reports** — drill into a specific area: `SECURITY.md`, `DEPENDENCY.md`,
+  `ARCHITECTURE.md`, `TEST_PLAN.md`, `RELEASE.md`, and the rest (full list under
+  [Output files](#output-files-deep-mode)).
+- **`FIXES.md`** — a prioritized, copy-paste list of concrete fixes.
+- **`scan.json`** — the full machine-readable result if you want to script against it.
+
+Every finding includes the file/line evidence, a confidence score, and a plain-English reason.
+
+### 5. Pick the right mode for the job
+
+- Quick triage or pre-commit: `--mode=quick` (security only, fastest).
+- Full review: `--mode=deep` (all modules).
+- Deep audit: `--mode=paranoid`.
+- Inside a pipeline: `--ci --fail-on=HIGH` (machine output + exit codes).
+
+### 6. Common workflows
+
+```bash
+# Gate a CI build: non-zero exit on HIGH or CRITICAL findings
+node apps/cli/dist/index.js scan . --ci --fail-on=HIGH
+
+# Quick release-readiness check (release + CI health only)
+node apps/cli/dist/index.js release-check .
+
+# Generate AI prompts grounded in this repo's real facts
+node apps/cli/dist/index.js prompts .
+
+# Re-scan without network access, using cached CVE/registry data
+node apps/cli/dist/index.js scan . --mode=deep --offline
+
+# Compare two past scans from the local history
+node apps/cli/dist/index.js history <repoId>
+node apps/cli/dist/index.js compare <scanId1> <scanId2>
+```
+
+> Tip: the examples above use the long form so they work immediately after `pnpm build`. To use
+> the shorter `xray <command>` form, see [The `xray` command](#the-xray-command) below.
+
 ## The `xray` command
 
 The CLI package ships a `bin` named `xray`. To use it as a global command:
