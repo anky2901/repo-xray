@@ -1,0 +1,37 @@
+{
+  "name": "repo-xray",
+  "private": true,
+  "license": "MIT",
+  "description": "Local-first repository intelligence platform: security, architecture, dependencies, tests, CI, release readiness, and more.",
+  "scripts": {
+    "typecheck": "pnpm -r --parallel typecheck",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "build": "pnpm lint && pnpm -r build"
+  },
+  "devDependencies": {
+    "@types/node": "20.0.0",
+    "@typescript-eslint/eslint-plugin": "8.60.0",
+    "@typescript-eslint/parser": "8.60.0",
+    "@vitest/coverage-v8": "1.4.0",
+    "eslint": "8.57.0",
+    "prettier": "3.2.0",
+    "tsup": "8.0.0",
+    "typescript": "6.0.3",
+    "vitest": "1.6.1"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3",
+      "esbuild"
+    ],
+    "overrides": {
+      "simple-git": "^3.36.0",
+      "vitest": "1.6.1",
+      "ws": "^8.20.1",
+      "tar-fs": "^3.1.1",
+      "esbuild": "^0.25.0",
+      "vite": "^6.4.2"
+    }
+  }
+}

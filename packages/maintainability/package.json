@@ -1,0 +1,17 @@
+{
+  "name": "@repo-xray/maintainability",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs --dts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": { "@repo-xray/types": "workspace:*" },
+  "devDependencies": {
+    "typescript": "*",
+    "tsup": "*",
+    "vitest": "*"
+  }
+}

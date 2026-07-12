@@ -1,0 +1,42 @@
+{
+  "name": "@repo-xray/core",
+  "version": "0.1.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs --dts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@repo-xray/cache": "workspace:*",
+    "@repo-xray/shared": "workspace:*",
+    "@repo-xray/types": "workspace:*",
+    "@repo-xray/security": "workspace:*",
+    "@repo-xray/architecture": "workspace:*",
+    "@repo-xray/explainability": "workspace:*",
+    "@repo-xray/export": "workspace:*",
+    "@repo-xray/discovery": "workspace:*",
+    "@repo-xray/parser": "workspace:*",
+    "@repo-xray/ingestion": "workspace:*",
+    "@repo-xray/dependency": "workspace:*",
+    "@repo-xray/testing": "workspace:*",
+    "@repo-xray/release": "workspace:*",
+    "@repo-xray/ci": "workspace:*",
+    "@repo-xray/prompting": "workspace:*",
+    "@repo-xray/reporting": "workspace:*",
+    "@repo-xray/maintainability": "workspace:*",
+    "@repo-xray/performance": "workspace:*",
+    "@repo-xray/git": "workspace:*",
+    "@repo-xray/codestyle": "workspace:*",
+    "@repo-xray/business": "workspace:*",
+    "simple-git": "3.27.0",
+    "adm-zip": "0.5.14"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "0.5.5",
+    "tsup": "*",
+    "typescript": "*",
+    "vitest": "*"
+  }
+}

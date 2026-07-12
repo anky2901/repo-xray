@@ -1,0 +1,7 @@
+node_modules
+dist
+.xray-cache
+.xray-reports
+.xray-self
+coverage
+benchmark

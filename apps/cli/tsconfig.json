@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "../../",
+    "paths": {
+      "@repo-xray/sdk": [
+        "packages/sdk/src/index.ts"
+      ]
+    },
+    "ignoreDeprecations": "5.0",
+    "outDir": "dist"
+  },
+  "include": [
+    "src"
+  ]
+}

@@ -1,0 +1,27 @@
+# Repo X-Ray self-scan ignore rules.
+#
+# This tool is a security/quality scanner, so scanning its own source flags
+# benign artifacts: the detector's own secret-pattern regexes, intentional test
+# fixtures containing mock secrets, lockfile integrity hashes (high entropy by
+# design), and previously generated scan/audit output. None are real findings,
+# so they are excluded from self-scans here.
+
+# Lockfiles: integrity hashes are high-entropy by design, not secrets.
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Generated reports and audit logs from prior runs.
+audit
+.xray-reports
+benchmark
+
+# Test fixtures intentionally embed mock secrets and dangerous-pattern samples.
+__tests__
+test-arch-fixtures
+
+# These modules necessarily contain the secret-pattern regexes and the report/
+# remediation code samples (e.g. eval/innerHTML) that the scanner searches for.
+security-analyzer.ts
+vuln-report.ts
+architecture-analyzer.ts

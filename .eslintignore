@@ -1,0 +1,6 @@
+node_modules
+dist
+.xray-cache
+.xray-reports
+coverage
+scaffold.js

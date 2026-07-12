@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Repo X-Ray - Interactive Dependency Graph</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #1e1e2e;
+      color: #cdd6f4;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #chart {
+      flex: 1;
+      position: relative;
+    }
+    #sidebar {
+      width: 350px;
+      background: #11111b;
+      border-left: 1px solid #313244;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
+    }
+    h2 {
+      margin-top: 0;
+      color: #f5c2e7;
+      border-bottom: 2px solid #313244;
+      padding-bottom: 10px;
+    }
+    .node {
+      stroke: #11111b;
+      stroke-width: 1.5px;
+      cursor: pointer;
+    }
+    .link {
+      stroke: #585b70;
+      stroke-opacity: 0.6;
+      stroke-width: 1.5px;
+      fill: none;
+      marker-end: url(#arrow);
+    }
+    .text {
+      font-size: 10px;
+      fill: #a6adc8;
+      pointer-events: none;
+    }
+    .detail-card {
+      background: #181825;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      border: 1px solid #313244;
+    }
+    .label {
+      font-weight: bold;
+      color: #89b4fa;
+    }
+    .value {
+      float: right;
+      color: #a6e3a1;
+    }
+    .legend {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(17, 17, 27, 0.9);
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #313244;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="chart">
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-color" style="background: #f38ba8;"></div>
+        <span>God File</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #fab387;"></div>
+        <span>High Coupling</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #a6e3a1;"></div>
+        <span>Healthy</span>
+      </div>
+    </div>
+  </div>
+  <div id="sidebar">
+    <h2>Module Details</h2>
+    <div id="details-content">
+      <p>Click on any node in the dependency graph to inspect its imports, exports, and coupling metrics.</p>
+    </div>
+  </div>
+
+  <script>
+    const nodes = [{"id":"index.js","name":"index.js","lines":1,"exportsCount":0,"importsCount":1,"group":"healthy"},{"id":"utils.js","name":"utils.js","lines":1,"exportsCount":1,"importsCount":0,"group":"healthy"}];
+    const links = [{"source":"index.js","target":"utils.js"}];
+
+    const width = document.getElementById('chart').clientWidth || 800;
+    const height = document.getElementById('chart').clientHeight || 600;
+
+    // Initialize positions randomly near center
+    nodes.forEach(n => {
+      n.x = width / 2 + (Math.random() - 0.5) * 300;
+      n.y = height / 2 + (Math.random() - 0.5) * 300;
+      n.vx = 0;
+      n.vy = 0;
+    });
+
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('height', '100%');
+    document.getElementById('chart').appendChild(svg);
+
+    // Create marker for arrows
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+    marker.setAttribute('id', 'arrow');
+    marker.setAttribute('viewBox', '0 -5 10 10');
+    marker.setAttribute('refX', '18');
+    marker.setAttribute('refY', '0');
+    marker.setAttribute('markerWidth', '6');
+    marker.setAttribute('markerHeight', '6');
+    marker.setAttribute('orient', 'auto');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M0,-5L10,0L0,5');
+    path.setAttribute('fill', '#585b70');
+    marker.appendChild(path);
+    defs.appendChild(marker);
+    svg.appendChild(defs);
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    svg.appendChild(g);
+
+    // Create link elements
+    const linkElements = links.map(l => {
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('class', 'link');
+      g.appendChild(line);
+      return { line, source: nodes.find(n => n.id === l.source), target: nodes.find(n => n.id === l.target) };
+    });
+
+    // Create node elements
+    let draggedNode = null;
+    const nodeElements = nodes.map(n => {
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('class', 'node');
+      circle.setAttribute('r', Math.min(20, 8 + n.lines / 100));
+      circle.setAttribute('fill', n.group === 'god-file' ? '#f38ba8' : n.group === 'high-coupling' ? '#fab387' : '#a6e3a1');
+      circle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showDetails(n);
+      });
+      
+      circle.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        draggedNode = n;
+        n.fx = e.clientX;
+        n.fy = e.clientY;
+      });
+
+      g.appendChild(circle);
+
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('class', 'text');
+      text.textContent = n.name;
+      g.appendChild(text);
+
+      return { circle, text, node: n };
+    });
+
+    svg.addEventListener('mousemove', (e) => {
+      if (draggedNode) {
+        const rect = svg.getBoundingClientRect();
+        draggedNode.x = (e.clientX - rect.left - panX) / scale;
+        draggedNode.y = (e.clientY - rect.top - panY) / scale;
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      draggedNode = null;
+    });
+
+    // Simple zoom / pan using mouse wheel and drag-background
+    let panX = 0, panY = 0, scale = 1;
+    let isPanning = false;
+    let startX = 0, startY = 0;
+
+    svg.addEventListener('mousedown', (e) => {
+      isPanning = true;
+      startX = e.clientX - panX;
+      startY = e.clientY - panY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isPanning && !draggedNode) {
+        panX = e.clientX - startX;
+        panY = e.clientY - startY;
+         g.setAttribute('transform', `translate(${panX}, ${panY}) scale(${scale})`);
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      isPanning = false;
+    });
+
+    svg.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const zoomFactor = 1.1;
+      const rect = svg.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      // Zoom towards mouse pointer
+      const localX = (mouseX - panX) / scale;
+      const localY = (mouseY - panY) / scale;
+
+      if (e.deltaY < 0) {
+        scale *= zoomFactor;
+      } else {
+        scale /= zoomFactor;
+      }
+
+      panX = mouseX - localX * scale;
+      panY = mouseY - localY * scale;
+
+      g.setAttribute('transform', `translate(${panX}, ${panY}) scale(${scale})`);
+    });
+
+     function showDetails(d) {
+       const content = document.getElementById('details-content');
+       content.innerHTML = `
+         <div class="detail-card">
+           <h3>\${d.name}</h3>
+           <p><span class="label">Path:</span> <span class="value" style="font-size:11px; word-break:break-all;">\${d.id}</span></p>
+           <p><span class="label">Lines of Code:</span> <span class="value">\${d.lines}</span></p>
+           <p><span class="label">Exports Count:</span> <span class="value">\${d.exportsCount}</span></p>
+           <p><span class="label">Imports Count:</span> <span class="value">\${d.importsCount}</span></p>
+           <p><span class="label">Module Class:</span> <span class="value" style="color:\${d.group === 'god-file' ? '#f38ba8' : d.group === 'high-coupling' ? '#fab387' : '#a6e3a1'}">\${d.group.toUpperCase()}</span></p>
+         </div>
+       `;
+     }
+
+    // Force-directed layout tick
+    function tick() {
+      const k = 100;
+      const gravity = 0.03;
+
+      for (let i = 0; i < nodes.length; i++) {
+        const n1 = nodes[i];
+        for (let j = i + 1; j < nodes.length; j++) {
+          const n2 = nodes[j];
+          const dx = n2.x - n1.x;
+          const dy = n2.y - n1.y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          if (dist < 300) {
+            const force = (k * k) / dist;
+            const fx = (dx / dist) * force * 0.15;
+            const fy = (dy / dist) * force * 0.15;
+            if (draggedNode !== n1) { n1.vx -= fx; n1.vy -= fy; }
+            if (draggedNode !== n2) { n2.vx += fx; n2.vy += fy; }
+          }
+        }
+      }
+
+      linkElements.forEach(l => {
+        if (!l.source || !l.target) return;
+        const dx = l.target.x - l.source.x;
+        const dy = l.target.y - l.source.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const force = (dist - k) * 0.08;
+        const fx = (dx / dist) * force;
+        const fy = (dy / dist) * force;
+        if (draggedNode !== l.source) { l.source.vx += fx; l.source.vy += fy; }
+        if (draggedNode !== l.target) { l.target.vx -= fx; l.target.vy -= fy; }
+      });
+
+      nodes.forEach(n => {
+        if (n === draggedNode) return;
+        
+        const dx = width / 2 - n.x;
+        const dy = height / 2 - n.y;
+        n.vx += dx * gravity;
+        n.vy += dy * gravity;
+
+        n.vx *= 0.85;
+        n.vy *= 0.85;
+
+        const speed = Math.sqrt(n.vx * n.vx + n.vy * n.vy);
+        const maxSpeed = 15;
+        if (speed > maxSpeed) {
+          n.vx = (n.vx / speed) * maxSpeed;
+          n.vy = (n.vy / speed) * maxSpeed;
+        }
+
+        n.x += n.vx;
+        n.y += n.vy;
+      });
+
+      linkElements.forEach(l => {
+        if (!l.source || !l.target) return;
+        l.line.setAttribute('x1', l.source.x);
+        l.line.setAttribute('y1', l.source.y);
+        l.line.setAttribute('x2', l.target.x);
+        l.line.setAttribute('y2', l.target.y);
+      });
+
+      nodeElements.forEach(ne => {
+        ne.circle.setAttribute('cx', ne.node.x);
+        ne.circle.setAttribute('cy', ne.node.y);
+        ne.text.setAttribute('x', ne.node.x + 12);
+        ne.text.setAttribute('y', ne.node.y + 4);
+      });
+
+      requestAnimationFrame(tick);
+    }
+
+    tick();
+  </script>
+</body>
+</html>

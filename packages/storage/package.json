@@ -1,0 +1,21 @@
+{
+  "name": "@repo-xray/storage",
+  "version": "0.1.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs --dts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@repo-xray/types": "workspace:*",
+    "better-sqlite3": "12.10.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "7.6.13",
+    "tsup": "*",
+    "typescript": "*",
+    "vitest": "*"
+  }
+}

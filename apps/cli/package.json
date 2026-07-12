@@ -1,0 +1,62 @@
+{
+  "name": "@repo-xray/cli",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Repo X-Ray command-line interface.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "xray": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "tsup": {
+    "entry": ["src/index.ts"],
+    "format": ["cjs"],
+    "dts": true,
+    "clean": true,
+    "banner": {
+      "js": "#!/usr/bin/env node"
+    },
+    "noExternal": [
+      "@repo-xray/sdk",
+      "@repo-xray/core",
+      "@repo-xray/types",
+      "@repo-xray/cache",
+      "@repo-xray/storage",
+      "@repo-xray/shared",
+      "@repo-xray/security",
+      "@repo-xray/architecture",
+      "@repo-xray/explainability",
+      "@repo-xray/export",
+      "@repo-xray/discovery",
+      "@repo-xray/parser",
+      "@repo-xray/ingestion",
+      "@repo-xray/dependency",
+      "@repo-xray/testing",
+      "@repo-xray/release",
+      "@repo-xray/ci",
+      "@repo-xray/prompting",
+      "@repo-xray/reporting"
+    ]
+  },
+  "dependencies": {
+    "@repo-xray/sdk": "workspace:*",
+    "@repo-xray/ci": "workspace:*",
+    "@repo-xray/release": "workspace:*",
+    "@repo-xray/prompting": "workspace:*",
+    "@repo-xray/ingestion": "workspace:*",
+    "@repo-xray/discovery": "workspace:*",
+    "better-sqlite3": "12.10.0",
+    "commander": "14.0.3"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "7.6.13",
+    "tsup": "*",
+    "typescript": "*",
+    "vitest": "*"
+  }
+}

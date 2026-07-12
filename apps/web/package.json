@@ -1,0 +1,16 @@
+{
+  "name": "@repo-xray/web",
+  "version": "0.1.0",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@repo-xray/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3",
+    "vitest": "1.4.0"
+  }
+}

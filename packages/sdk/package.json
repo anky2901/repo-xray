@@ -1,0 +1,24 @@
+{
+  "name": "@repo-xray/sdk",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs --dts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@repo-xray/core": "workspace:*",
+    "@repo-xray/types": "workspace:*",
+    "@repo-xray/cache": "workspace:*",
+    "@repo-xray/storage": "workspace:*",
+    "@repo-xray/shared": "workspace:*",
+    "@repo-xray/reporting": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "*",
+    "tsup": "*",
+    "vitest": "*"
+  }
+}
