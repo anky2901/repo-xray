@@ -1,5 +1,7 @@
 # Repo X-Ray
 
+[![CI](https://github.com/anky2901/repo-xray/actions/workflows/ci.yml/badge.svg)](https://github.com/anky2901/repo-xray/actions/workflows/ci.yml)
+
 Local-first repository intelligence. Point it at a repo and it produces explainable,
 deterministic reports on security, architecture, dependencies, tests, CI, release readiness,
 maintainability, performance, git health, code style, business context, and more — plus
